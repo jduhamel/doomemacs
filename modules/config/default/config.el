@@ -460,6 +460,16 @@ Continues comments if executed from a commented line. Consults
 
   (map! :when (modulep! :completion corfu)
         :after corfu
+        (:map corfu-mode-map
+         :prefix "C-x"
+         "C-l" #'cape-line
+         "C-k" #'cape-keyword
+         "C-f" #'cape-file
+         "s"   #'cape-dict
+         "C-s" #'yasnippet-capf
+         "C-o" #'completion-at-point
+         "C-n" #'cape-dabbrev
+         "C-p" #'cape-history)
         (:map corfu-map
          [return] #'corfu-insert
          "RET" #'corfu-insert

@@ -7,7 +7,7 @@
 ;;; Packages
 (use-package! corfu
   :defer t
-  :hook (doom-first-buffer-hook . global-corfu-mode)
+  :hook (doom-first-input . global-corfu-mode)
   :config
   (setq corfu-auto t
         corfu-auto-delay 0.1
