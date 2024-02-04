@@ -10,12 +10,13 @@
 
 ;;;###autoload
 (defun +corfu-move-to-minibuffer ()
-  ;; Taken from corfu's README.
-  ;; TODO: extend this to other completion front-ends.
+  ;; Adapted from Corfu's README.
   (interactive)
-  (let ((completion-extra-properties corfu--extra)
-        (completion-cycle-threshold completion-cycling))
-    (apply #'consult-completion-in-region completion-in-region--data)))
+  (pcase completion-in-region--data
+    (`(,_ ,_ ,table ,pred ,extras)
+     (let ((completion-extra-properties extras)
+           completion-cycle-threshold completion-cycling)
+       (completing-read "Completion: " table pred nil nil 'corfu-history)))))
 
 ;;;###autoload
 (defun +corfu-smart-sep-toggle-escape ()
