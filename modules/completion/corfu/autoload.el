@@ -13,10 +13,10 @@
   ;; Adapted from Corfu's README.
   (interactive)
   (pcase completion-in-region--data
-    (`(,beg ,end ,table ,pred . ,extras)
+    (`(,_ ,_ ,table ,pred ,extras)
      (let ((completion-extra-properties extras)
            completion-cycle-threshold completion-cycling)
-       (funcall (default-value 'completion-in-region-function) beg end table pred)))))
+       (completing-read "Completion: " table pred nil nil 'corfu-history)))))
 
 ;;;###autoload
 (defun +corfu-smart-sep-toggle-escape ()

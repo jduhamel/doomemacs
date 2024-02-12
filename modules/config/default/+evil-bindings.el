@@ -163,6 +163,14 @@
        (:after corfu
         (:map corfu-mode-map
          :e "C-M-i" #'completion-at-point
+         (:prefix "C-x"
+          :i "C-l" #'cape-line
+          :i "C-k" #'cape-keyword
+          :i "C-f" #'cape-file
+          :i "s"   #'cape-dict
+          :i "C-s" #'yasnippet-capf
+          :i "C-n" #'cape-dabbrev
+          :i "C-p" #'cape-history)
          (:unless (modulep! :completion corfu +tng)
           :i "C-SPC" #'completion-at-point
           :n "C-SPC" (cmd! (call-interactively #'evil-insert-state)
@@ -170,9 +178,9 @@
           :v "C-SPC" (cmd! (call-interactively #'evil-change)
                            (call-interactively #'completion-at-point))))
         (:map corfu-map
-          "C-u" (cmd! (let ((corfu-cycle nil))
+          "C-u" (cmd! (let (corfu-cycle)
                         (funcall-interactively #'corfu-next (- corfu-count))))
-          "C-d" (cmd! (let ((corfu-cycle nil))
+          "C-d" (cmd! (let (corfu-cycle)
                         (funcall-interactively #'corfu-next corfu-count)))))
        (:after corfu-popupinfo
         :map corfu-popupinfo-map
