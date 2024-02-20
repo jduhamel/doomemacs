@@ -3,11 +3,20 @@
 (defvar +corfu-buffer-scanning-size-limit (* 1 1024 1024) ; 1 MB
   "Size limit for a buffer to be scanned by `cape-dabbrev'.")
 
+(defvar +corfu-want-C-x-bindings t
+  "Whether `C-x' is a completion prefix in Evil insert state.")
+
 ;;
 ;;; Packages
 (use-package! corfu
-  :defer t
   :hook (doom-first-input . global-corfu-mode)
+  :init
+  (add-hook! 'minibuffer-setup-hook
+    (defun +corfu-enable-in-minibuffer ()
+      "Enable Corfu in the minibuffer if `completion-at-point' is bound."
+      (when (where-is-internal #'completion-at-point (list (current-local-map)))
+        (setq-local corfu-echo-delay nil)
+        (corfu-mode +1))))
   :config
   (setq corfu-auto t
         corfu-auto-delay 0.1
@@ -35,22 +44,34 @@
 
   (add-to-list 'corfu-continue-commands #'+corfu-move-to-minibuffer)
 
-  (add-hook! 'minibuffer-setup-hook
-    (defun +corfu-enable-in-minibuffer ()
-      "Enable Corfu in the minibuffer if `completion-at-point' is bound."
-      (when (where-is-internal #'completion-at-point (list (current-local-map)))
-        (setq-local corfu-echo-delay nil)
-        (corfu-mode +1))))
 
-  (after! evil
-    (add-hook 'evil-insert-state-exit-hook #'corfu-quit))
+  (add-hook 'evil-insert-state-exit-hook #'corfu-quit)
 
   (when (modulep! +icons)
     (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
   (when (modulep! +orderless)
     (after! orderless
-      (setq orderless-component-separator #'orderless-escapable-split-on-space))))
+      (setq orderless-component-separator #'orderless-escapable-split-on-space)))
+
+  ;; If you want to update the visual hints after completing minibuffer commands
+  ;; with Corfu and exiting, you have to do it manually.
+  (defadvice! +corfu--insert-before-exit-minibuffer-a ()
+    :before #'exit-minibuffer
+    (when (or (and (frame-live-p corfu--frame)
+                   (frame-visible-p corfu--frame))
+              (and (featurep 'corfu-terminal)
+                   (popon-live-p corfu-terminal--popon)))
+      (when (member isearch-lazy-highlight-timer timer-idle-list)
+        (apply (timer--function isearch-lazy-highlight-timer)
+               (timer--args isearch-lazy-highlight-timer)))
+      (when (member (bound-and-true-p anzu--update-timer) timer-idle-list)
+        (apply (timer--function anzu--update-timer)
+               (timer--args anzu--update-timer)))
+      (when (member (bound-and-true-p evil--ex-search-update-timer)
+                    timer-idle-list)
+        (apply (timer--function evil--ex-search-update-timer)
+               (timer--args evil--ex-search-update-timer))))))
 
 (use-package! cape
   :defer t
@@ -66,6 +87,10 @@
     ;; Set up `cape-dabbrev' options.
     (defun +dabbrev-friend-buffer-p (other-buffer)
       (< (buffer-size other-buffer) +corfu-buffer-scanning-size-limit))
+    (add-hook! (prog-mode text-mode conf-mode comint-mode minibuffer-setup
+                          eshell-mode)
+      (defun +corfu-add-cape-dabbrev-h ()
+        (add-hook 'completion-at-point-functions #'cape-dabbrev 20 t)))
     (after! dabbrev
       (setq cape-dabbrev-check-other-buffers t
             dabbrev-friend-buffer-function #'+dabbrev-friend-buffer-p
@@ -73,12 +98,7 @@
             '("^ "
               "\\(TAGS\\|tags\\|ETAGS\\|etags\\|GTAGS\\|GRTAGS\\|GPATH\\)\\(<[0-9]+>\\)?")
             dabbrev-upcase-means-case-search t)
-      (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode)
-
-      (add-hook! (prog-mode text-mode conf-mode comint-mode minibuffer-setup
-                            eshell-mode)
-        (defun +corfu-add-cape-dabbrev-h ()
-          (add-hook 'completion-at-point-functions #'cape-dabbrev 20 t)))))
+      (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode)))
   ;; Complete emojis :).
   (when (and (modulep! +emoji) (> emacs-major-version 28))
     (add-hook! (prog-mode conf-mode)

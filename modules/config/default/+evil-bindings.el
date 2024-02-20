@@ -163,14 +163,15 @@
        (:after corfu
         (:map corfu-mode-map
          :e "C-M-i" #'completion-at-point
-         (:prefix "C-x"
-          :i "C-l" #'cape-line
-          :i "C-k" #'cape-keyword
-          :i "C-f" #'cape-file
-          :i "s"   #'cape-dict
-          :i "C-s" #'yasnippet-capf
-          :i "C-n" #'cape-dabbrev
-          :i "C-p" #'cape-history)
+         (:when +corfu-want-C-x-bindings
+           (:prefix "C-x"
+            :i "C-l" #'cape-line
+            :i "C-k" #'cape-keyword
+            :i "C-f" #'cape-file
+            :i "s"   #'cape-dict
+            :i "C-s" #'yasnippet-capf
+            :i "C-n" #'cape-dabbrev
+            :i "C-p" #'cape-history))
          (:unless (modulep! :completion corfu +tng)
           :i "C-SPC" #'completion-at-point
           :n "C-SPC" (cmd! (call-interactively #'evil-insert-state)
@@ -407,10 +408,8 @@
       ;;; <leader> c --- code
       (:prefix-map ("c" . "code")
        (:when (and (modulep! :tools lsp) (not (modulep! :tools lsp +eglot)))
-        :desc "LSP"                                  "l"   #'+default/lsp-command-map
-        :desc "LSP Execute code action"              "a"   #'lsp-execute-code-action
-        :desc "LSP Organize imports"                 "o"   #'lsp-organize-imports
-        :desc "LSP Rename"                           "r"   #'lsp-rename
+        :desc "LSP Execute code action" "a" #'lsp-execute-code-action
+        :desc "LSP Organize imports" "o" #'lsp-organize-imports
         (:when (modulep! :completion ivy)
          :desc "Jump to symbol in current workspace" "j"   #'lsp-ivy-workspace-symbol
          :desc "Jump to symbol in any workspace"     "J"   #'lsp-ivy-global-workspace-symbol)
@@ -425,10 +424,12 @@
          :desc "Incoming call hierarchy"             "y"   #'lsp-treemacs-call-hierarchy
          :desc "Outgoing call hierarchy"             "Y"   (cmd!! #'lsp-treemacs-call-hierarchy t)
          :desc "References tree"                     "R"   (cmd!! #'lsp-treemacs-references t)
-         :desc "Symbols"                             "S"   #'lsp-treemacs-symbols))
+         :desc "Symbols"                             "S"   #'lsp-treemacs-symbols)
+         :desc "LSP"                                 "l"   #'+default/lsp-command-map
+         :desc "LSP Rename"                          "r"   #'lsp-rename)
        (:when (modulep! :tools lsp +eglot)
-        :desc "LSP Execute code action"              "a"   #'eglot-code-actions
-        :desc "LSP Rename"                           "r"   #'eglot-rename
+        :desc "LSP Execute code action" "a" #'eglot-code-actions
+        :desc "LSP Rename" "r" #'eglot-rename
         :desc "LSP Find declaration"                 "j"   #'eglot-find-declaration
         (:when (modulep! :completion vertico)
          :desc "Jump to symbol in current workspace" "j"   #'consult-eglot-symbols))

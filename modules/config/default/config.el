@@ -48,8 +48,8 @@
                           (time-to-seconds))
                     collect (epg-sub-key-fingerprint subkey))))
        user-mail-address))
-  ;; And suppress prompts if epa-file-encrypt-to has a default value (without
-  ;; overwriting file-local values).
+   ;; And suppress prompts if epa-file-encrypt-to has a default value (without
+   ;; overwriting file-local values).
   (defadvice! +default--dont-prompt-for-keys-a (&rest _)
     :before #'epa-file-write-region
     (unless (local-variable-p 'epa-file-encrypt-to)
@@ -170,7 +170,7 @@
         (and (sp-in-code-p id action context)
              (save-excursion
                (goto-char (line-beginning-position))
-               (looking-at-p "[ \t]*#include[^<]+"))))
+               (looking-at-p "[ 	]*#include[^<]+"))))
 
       ;; ...and leave it to smartparens
       (sp-local-pair '(c++-mode objc-mode)
@@ -467,12 +467,12 @@ Continues comments if executed from a commented line. Consults
          "C-p" #'corfu-previous
          "C-n" #'corfu-next
          (:when (modulep! :completion corfu +orderless)
-          "<remap> <completion-at-point>" #'+corfu-smart-sep-toggle-escape)
+          [remap completion-at-point] #'+corfu-smart-sep-toggle-escape)
          (:when (modulep! :completion corfu +tng)
-          [tab] #'corfu-next
-          "TAB" #'corfu-next
-          [backtab] #'corfu-previous
-          "S-TAB" #'corfu-previous))
+          :gi [tab] #'corfu-next
+          :gi "TAB" #'corfu-next
+          :gi [backtab] #'corfu-previous
+          :gi "S-TAB" #'corfu-previous))
         (:after corfu-popupinfo
          :map corfu-popupinfo-map
          "C-<up>" #'corfu-popupinfo-scroll-down
@@ -482,14 +482,14 @@ Continues comments if executed from a commented line. Consults
          "C-S-u" (cmd! (funcall-interactively #'corfu-popupinfo-scroll-down corfu-popupinfo-min-height))
          "C-S-d" (cmd! (funcall-interactively #'corfu-popupinfo-scroll-up corfu-popupinfo-min-height)))
         (:map corfu-map
-         :gi "C-<return>" '(menu-item "Conclude the minibuffer" exit-minibuffer
-                            :enable (active-minibuffer-window))
-         :gi "S-<return>" '(menu-item "Insert completion and conclude" +corfu-complete-and-exit-minibuffer
-                            :enable (active-minibuffer-window))))
+         "C-<return>" '(menu-item "Conclude the minibuffer" exit-minibuffer
+                        :enable (minibufferp nil t))
+         "S-<return>" '(menu-item "Insert completion and conclude" +corfu-complete-and-exit-minibuffer
+                        :enable (minibufferp nil t))))
   (when-let ((cmds-del (and (modulep! :completion corfu +tng)
-                            (cmds! (and (> corfu--index -1)
-                                        (eq corfu-preview-current 'insert))
-                                   #'corfu-reset))))
+                            '(menu-item "Reset completion" corfu-reset
+                              :enable (and (> corfu--index -1)
+                                           (eq corfu-preview-current 'insert))))))
     (map! :after corfu
           :map corfu-map
           [backspace] cmds-del

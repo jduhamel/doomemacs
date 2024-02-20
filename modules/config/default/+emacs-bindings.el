@@ -542,7 +542,7 @@
        (:map corfu-mode-map
         "C-M-i" #'completion-at-point)
        (:map corfu-popupinfo-map
-         "C-S-h" #'corfu-popupinfo-toggle))
+        "C-S-h" #'corfu-popupinfo-toggle))
 
       ;;; ein notebooks
       (:after ein:notebook-multilang
