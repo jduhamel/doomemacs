@@ -8,6 +8,14 @@
 Setting this to `aggressive' will enable Corfu in more commands which
 use the minibuffer such as `query-replace'.")
 
+(defvar +corfu-want-ret-to-confirm t
+  "Configure how the user expects RET to behave.
+Possible values are:
+- t (default): Insert candidate if one is selected, pass-through otherwise;
+- `minibuffer': Insert candidate if one is selected, pass-through otherwise,
+              and immediatelly exit if in the minibuffer;
+- nil: Pass-through without inserting.")
+
 ;;
 ;;; Packages
 (use-package! corfu
